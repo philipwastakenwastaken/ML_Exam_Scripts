@@ -238,6 +238,11 @@ def prob_given_class(x, class_list, class_check, indx_check):
     return count / len([j for j in class_list if j == indx_check])
 
 
+# x: observation list. class_list: 
+# class of x[i] = class_list[i]. 
+# naive bayes i p(y = c | x1, ..., xn)
+# class_check: c
+# indx_list: the indexes of x1 ... xn
 def naive_bayes(x, class_list, class_check, indx_list, C):
     top = 1
     for indx in indx_list:
@@ -252,7 +257,5 @@ def naive_bayes(x, class_list, class_check, indx_list, C):
         bot *= prob_class(class_list, cl)
         bot_sum += bot
     return top / bot_sum
-    
-        
-        
-        
+
+
