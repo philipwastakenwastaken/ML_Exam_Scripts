@@ -124,3 +124,16 @@ def acc(x):
 
 def er(x):
     return 1 - acc(x)
+
+
+# Item set support and confidence
+# x is number of observations containing x
+# n is total number of observations
+def support(x, n):
+    return x / n
+
+# xy is number of observations that both include x and y
+# x is number of observations including x
+# n is total number of observations 
+def confidence(xy, x, n):
+    return support(xy,n) / support(x, n)
