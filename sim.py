@@ -259,11 +259,46 @@ def naive_bayes(x, class_list, class_check, indx_list, C):
 
 
 # ada boost algorithm assuming equal probability of initial weights
-def ada_boost(x, rounds, alpha_e_list, class_list):
-    w_list = [1 / len(x)] * len(x)
+def ada_boost(error_lists):
+    w_list = [1 / len(error_lists[0])] * len(error_lists[0])
     
-    for error in alpha_e_list:
-        alpha = 0.5 * math.log2((1 - error) / error)
+    for error_list in error_lists:
+        e = 0
+        new_weights = []
+
+        # calc epsilon
+        for w, error in zip(w_list, error_list):
+            delta = 1
+            if error:
+                delta = 0
+            e += w * (1 - delta)
+        
+        alpha = 0.5 * math.log((1 - e) / e)
+        print('alpha:', alpha)
+        print('e', e)
+
+        for w, error in zip(w_list, error_list):
+            top_alpha = -alpha
+            if error:
+                top_alpha = alpha
+            top_w = w * math.exp(top_alpha)
+            bot_w_sum = 0
+            print(top_w)
+
+            for w, error in zip(w_list, error_list):
+                top_alpha = -alpha
+                if error:
+                    top_alpha = alpha
+                bot_w_sum += w * math.exp(top_alpha)
+            new_weights.append(top_w / bot_w_sum)
+        w_list = new_weights
+    return w_list
+
+                
+
+
+
+
 
 
 
