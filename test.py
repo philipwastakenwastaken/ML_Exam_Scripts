@@ -26,3 +26,10 @@ print("supp D:", sim.support_mult(o_list, indx_list4))
 a_left = [0, 2]
 a_right = [4, 6]
 print('conf:', sim.conf(o_list, a_left, a_right))
+
+class_list = [1, 0, 0, 1, 2, 0, 2, 2, 0, 2]
+indx_list = [1, 2]
+
+p = sim.naive_bayes(o_list, class_list, 2, indx_list, 3)
+print('p', p)
+

@@ -219,3 +219,40 @@ def acc(x):
 
 def er(x):
     return 1 - acc(x)
+
+
+def prob_class(class_list, class_check):
+    count = 0
+    for cl in class_list:
+        if cl == class_check:
+            count += 1
+    return count / len(class_list)
+
+
+def prob_given_class(x, class_list, class_check, indx_check):
+    count = 0
+
+    for indx, obs in enumerate(x):
+        if class_list[indx] == class_check and obs[indx_check] == 1:
+            count += 1
+    return count / len([j for j in class_list if j == indx_check])
+
+
+def naive_bayes(x, class_list, class_check, indx_list, C):
+    top = 1
+    for indx in indx_list:
+        top *= prob_given_class(x, class_list, class_check, indx)
+    top *= prob_class(class_list, class_check)
+
+    bot_sum = 0
+    for cl in range(0, C):
+        bot = 1
+        for indx in indx_list:
+            bot *= prob_given_class(x, class_list, cl, indx)
+        bot *= prob_class(class_list, cl)
+        bot_sum += bot
+    return top / bot_sum
+    
+        
+        
+        
