@@ -231,11 +231,10 @@ def prob_class(class_list, class_check):
 
 def prob_given_class(x, class_list, class_check, indx_check):
     count = 0
-
     for indx, obs in enumerate(x):
         if class_list[indx] == class_check and obs[indx_check] == 1:
             count += 1
-    return count / len([j for j in class_list if j == indx_check])
+    return count / len([j for j in class_list if j == class_check])
 
 
 # x: observation list. class_list: 
@@ -257,5 +256,15 @@ def naive_bayes(x, class_list, class_check, indx_list, C):
         bot *= prob_class(class_list, cl)
         bot_sum += bot
     return top / bot_sum
+
+
+# ada boost algorithm assuming equal probability of initial weights
+def ada_boost(x, rounds, alpha_e_list, class_list):
+    w_list = [1 / len(x)] * len(x)
+    
+    for error in alpha_e_list:
+        alpha = 0.5 * math.log2((1 - error) / error)
+
+
 
 
