@@ -14,6 +14,11 @@ TN = 3
 # p 2 norm = circle
 # p 1 norm = diamond
 
+# K1 * (K2 *  L + 1)(edited)
+# K1 = outer cv
+# 2 = inner cv
+# L = antal parametre, man tester
+
 
 # computes f00
 def f00(a, b):
@@ -112,7 +117,7 @@ def support(x, indx_list):
                 inner_count += 1
         if inner_count == len(indx_list):
             count += 1
-    return count / len(x)
+    return round(count / len(x), 3)
 
 
 # calculates support for each item set included in indx_list
@@ -229,36 +234,39 @@ def prob_class(class_list, class_check):
     return count / len(class_list)
 
 
-def prob_given_class(x, class_list, class_check, indx_check):
+def prob_given_class(x, class_list, class_check, indx_check, equal):
     count = 0
     for indx, obs in enumerate(x):
-        if class_list[indx] == class_check and obs[indx_check] == 1:
+        if class_list[indx] == class_check and obs[indx_check] == equal:
             count += 1
     return count / len([j for j in class_list if j == class_check])
 
 
-# x: observation list. class_list: 
-# class of x[i] = class_list[i]. 
+# x: observation list. class_list:
+# class of x[i] = class_list[i].
 # naive bayes i p(y = c | x1, ..., xn)
 # class_check: c
 # indx_list: the indexes of x1 ... xn
-def naive_bayes(x, class_list, class_check, indx_list, C):
+def naive_bayes(x, class_list, class_check, indx_list, equal_to, C):
     top = 1
-    for indx in indx_list:
-        top *= prob_given_class(x, class_list, class_check, indx)
+    for indx, equal in zip(indx_list, equal_to):
+        top *= prob_given_class(x, class_list, class_check, indx, equal)
     top *= prob_class(class_list, class_check)
 
     bot_sum = 0
     for cl in range(0, C):
         bot = 1
-        for indx in indx_list:
-            bot *= prob_given_class(x, class_list, cl, indx)
+        for indx, equal in zip(indx_list, equal_to):
+            bot *= prob_given_class(x, class_list, cl, indx, equal)
         bot *= prob_class(class_list, cl)
         bot_sum += bot
     return top / bot_sum
 
 
 # ada boost algorithm assuming equal probability of initial weights
+# error_lists: list of lists of booleans, one list for each round of ada boost.
+# each list contains elements that are True is they were misclassfied, and
+# false otherwise.
 def ada_boost(error_lists):
     w_list = [1 / len(error_lists[0])] * len(error_lists[0])
 
@@ -302,7 +310,7 @@ def k_means_1d_no_init(cluster_list):
         for o in cl:
             sum += o
         mean_list.append(sum / len(cl))
-    
+
     # find mismatches
     for indx, cl in enumerate(cluster_list):
 
@@ -312,7 +320,6 @@ def k_means_1d_no_init(cluster_list):
 
                 if abs(o - mean) < abs(o - mean_list[indx]):
                     return False
-            
     return True
 
 
@@ -340,7 +347,7 @@ def k_means_1d_init(obs_list, init_list, k):
                     dist_min = abs(obs - mean)
                     indx = cl
             centroid_list[indx].append(obs)
-        
+
         # calculate new means
         mean_list = []
         for centroid in centroid_list:
@@ -348,24 +355,8 @@ def k_means_1d_init(obs_list, init_list, k):
             for obs in centroid:
                 sum += obs
             mean_list.append(sum / len(centroid))
-        
+
         # check if centroids changed
         if mean_list == old_mean_list:
             cond = False
     return centroid_list
-
-
-
-
-                
-
-
-
-
-
-
-
-
-
-
-
