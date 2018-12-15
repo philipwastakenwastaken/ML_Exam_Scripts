@@ -180,8 +180,8 @@ def print_euclid_1d(x, inc_zero):
     output = ''
     top = '  '
     for indx, v1 in enumerate(y):
-        top += '     ' + str(indx)
-        output += str(indx) + ' '
+        top += '     ' + str(indx + 1)
+        output += str(indx + 1) + ' '
         for v2 in v1:
             output += '   ' + str(round(abs(v2), 2))
         output += '\n'
@@ -292,7 +292,75 @@ def ada_boost(error_lists):
         w_list = new_weights
     return w_list
 
+
+# use this if you are NOT given a set of initial centroids.
+def k_means_1d_no_init(cluster_list):
+    # calc mean of clusters
+    mean_list = []
+    for cl in cluster_list:
+        sum = 0
+        for o in cl:
+            sum += o
+        mean_list.append(sum / len(cl))
+    
+    # find mismatches
+    for indx, cl in enumerate(cluster_list):
+
+        for o in cl:
+
+            for mean in mean_list:
+
+                if abs(o - mean) < abs(o - mean_list[indx]):
+                    return False
+            
+    return True
+
+
+# use this if you are given a set of initial centroids
+def k_means_1d_init(obs_list, init_list, k):
+    mean_list = []
+    # init mean list with intial centroids
+    for init in init_list:
+        mean_list.append(obs_list[init])
+    cond = True
+
+    while (cond):
+        old_mean_list = mean_list
+        centroid_list = []
+        for i in range(0, k):
+            centroid_list.append([])
+        # assign each point to each nearest cluster
+        for obs in obs_list:
+
+            # calc distance to each cluster
+            dist_min = 1000000
+            indx = 0
+            for cl, mean in enumerate(mean_list):
+                if abs(obs - mean) < dist_min:
+                    dist_min = abs(obs - mean)
+                    indx = cl
+            centroid_list[indx].append(obs)
+        
+        # calculate new means
+        mean_list = []
+        for centroid in centroid_list:
+            sum = 0
+            for obs in centroid:
+                sum += obs
+            mean_list.append(sum / len(centroid))
+        
+        # check if centroids changed
+        if mean_list == old_mean_list:
+            cond = False
+    return centroid_list
+
+
+
+
                 
+
+
+
 
 
 
