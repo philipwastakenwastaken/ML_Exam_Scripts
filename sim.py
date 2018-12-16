@@ -446,15 +446,3 @@ def find_min_class(obs, class_list, classes):
             min_ele = dist
             min_indx = indx
     return min_indx
-
-
-
-
-
-
-
-
-
-
-        
-
