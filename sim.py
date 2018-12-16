@@ -41,6 +41,27 @@ def f11(a, b):
     return count
 
 
+# diff is used for clustering..
+def f00_diff(a, b):
+    count = 0
+    for o1 in a:
+        for o2 in b:
+            if o1 != o2:
+                count += 1
+    return count
+
+
+def f11_diff(a, b):
+    count = 0
+    v_list = [a, b]
+    for v in v_list:
+        for indx, o1 in enumerate(v):
+            for i in range(indx + 1, len(v)):
+                if o1 == v[i]:
+                    count += 1
+    return count
+
+
 # euclidian norm for a vector.
 def euclid_norm(a):
     sum = 0
@@ -57,9 +78,17 @@ def p_norm(a, p):
     return sum ** (1 / p)
 
 
-# jaccard coefficient for two vectors
+# jaccard coefficient for clustering
+def j_clus(a, b):
+    sum_len = len(a) + len(b)
+    K = (sum_len * (sum_len - 1)) / 2
+    return f11_diff(a, b) / (K - f00_diff(a, b))
+
+
+# jaccard sim for two vectors
 def j_coeff(a, b):
-    return f11(a, b) / (len(a) - f00(a, b))
+    M = len(a)
+    return f11(a, b) / (M - f00(a, b))
 
 
 # SMC
@@ -72,7 +101,7 @@ def cos(a, b):
     top = 0
     for v1, v2 in zip(a, b):
         top += v1 * v2
-    return top / (p_norm(a, 2) * p_norm(b, 2))
+    return f11(a, b) / (p_norm(a, 2) * p_norm(b, 2))
 
 
 # EJ
@@ -320,10 +349,6 @@ def prob_given_many_class(x, class_list, class_check, indx_list, equal_to):
     return count / len([j for j in class_list if j == class_check])
 
 
-
-
-
-
 # ada boost algorithm assuming equal probability of initial weights
 # error_lists: list of lists of booleans, one list for each round of ada boost.
 # each list contains elements that are True is they were misclassfied, and
@@ -358,7 +383,7 @@ def ada_boost(error_lists):
                 bot_w_sum += w * math.exp(top_alpha)
             new_weights.append(top_w / bot_w_sum)
         w_list = new_weights
-    return w_list
+    return [round(z, 4) for z in w_list]
 
 
 # use this if you are NOT given a set of initial centroids.
@@ -388,7 +413,7 @@ def k_means_1d_init(obs_list, init_list):
     mean_list = []
     # init mean list with intial centroids
     for init in init_list:
-        mean_list.append(obs_list[init])
+        mean_list.append(init)
     cond = True
 
     while (cond):
@@ -425,6 +450,8 @@ def k_means_1d_init(obs_list, init_list):
 # knn algorithm
 # ties are decided by looking at the class of nearest element
 # contained in the tied classes list.
+# USE D_LIST WITH ZEROES INCLUDED
+# classes is values of classes
 def knn(d_list, class_list, k, classes):
     errors = 0
     n_class = [0] * len(classes)
@@ -473,8 +500,56 @@ def find_min_class(obs, class_list, classes):
     min_ele = 1000000
     min_indx = 0
 
-    for indx, dist in obs:
+    for indx, dist in enumerate(obs):
         if dist < min_ele and dist != 0 and class_list[indx] in classes:
             min_ele = dist
             min_indx = indx
     return min_indx
+
+
+def dec_tree_ce(root, splits):
+    # impurity of root
+    n_root = sum(root)
+    max_class = max(root)
+    imp_root = 1 - (max_class / n_root)
+
+    # impurity of splits
+    imp_list = []
+    for split in splits:
+        max_class = max(split)
+        impurity = 1 - (max_class / sum(split))
+        imp_list.append(impurity)
+
+    # purity gain
+    p_sum = 0
+    for split, imp in zip(splits, imp_list):
+        frac = sum(split) / n_root
+        p_sum += frac * imp
+    return imp_root - p_sum
+
+
+def dec_tree_gini(root, splits):
+    # impurity of root
+    imp_root = gini_imp(root)
+    n_root = sum(root)
+
+    # impurity of splits
+    imp_list = []
+    for split in splits:
+        impurity = gini_imp(split)
+        imp_list.append(impurity)
+
+    # purity gain
+    p_sum = 0
+    for split, imp in zip(splits, imp_list):
+        frac = sum(split) / n_root
+        p_sum += frac * imp
+    return imp_root - p_sum
+
+
+def gini_imp(split):
+    n = sum(split)
+    sum1 = 0
+    for s in split:
+        sum1 += (s / n) ** 2
+    return 1 - sum1
