@@ -391,6 +391,8 @@ def k_means_1d_init(obs_list, init_list):
 
 
 # knn algorithm
+# ties are decided by looking at the class of nearest element
+# contained in the tied classes list.
 def knn(d_list, class_list, k, classes):
     errors = 0
     n_class = [0] * len(classes)
