@@ -388,3 +388,71 @@ def k_means_1d_init(obs_list, init_list):
         if mean_list == old_mean_list:
             cond = False
     return centroid_list
+
+
+# knn algorithm
+def knn(d_list, class_list, k, classes):
+    errors = 0
+    n_class = [0] * len(classes)
+
+    for obs_num, obs in enumerate(d_list):
+        sorted_obs = obs
+        sorted_obs.sort()
+        smallest_vals = []
+        # find k smallest values
+        for i in range(1, k + 1):
+            smallest_vals.append(sorted_obs[i])
+        indx_list = []
+        # find the indxs of the smallest values
+        for val in smallest_vals:
+            indx_list.append(obs.index(val))
+        
+        # count the neighbours classes
+        for indx in indx_list:
+            for cl_index, cl in enumerate(classes):
+                if class_list[indx] == cl:
+                    n_class[cl_index] = n_class[cl_index] + 1
+        
+        # handle ties by choosing the class which has the closest element
+        tie = False
+        tie_list = []
+        if n_class.count(max(n_class) > 1):
+            tie = True
+            # find which classes that are tied
+            max_ele = max(n_class)
+            for indx, cl in enumerate(n_class):
+                if max_ele == cl:
+                    tie_list.append(indx)
+        if tie:
+            nearest_index = find_min_class(obs, class_list, tie_list)
+            assigned_class = class_list[nearest_index]
+            if class_list[obs_num] != assigned_class:
+                errors += 1
+        else:
+            assigned_class = n_class.index(max(n_class))
+            if class_list[obs_num] != assigned_class:
+                errors += 1
+    return errors / len(d_list)
+        
+
+def find_min_class(obs, class_list, classes):
+    min_ele = 1000000
+    min_indx = 0
+
+    for indx, dist in obs:
+        if dist < min_ele and dist != 0 and class_list[indx] in classes:
+            min_ele = dist
+            min_indx = indx
+    return min_indx
+
+
+
+
+
+
+
+
+
+
+        
+
