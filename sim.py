@@ -292,6 +292,38 @@ def naive_bayes(x, class_list, class_check, indx_list, equal_to, C):
     return top / bot_sum
 
 
+def bayes(x, class_list, class_check, indx_list, equal_to, C):
+    top = prob_given_many_class(x, class_list, class_check, indx_list, equal_to)
+    top *= prob_class(class_list, class_check)
+
+    bot_sum = 0
+    for cl in range(0, C):
+        bot = prob_given_many_class(x, class_list, cl, indx_list, equal_to)
+        bot *= prob_class(class_list, cl)
+        bot_sum += bot
+    print(top)
+    print(bot)
+    return top / bot
+
+
+def prob_given_many_class(x, class_list, class_check, indx_list, equal_to):
+    count = 0
+    for indx, obs in enumerate(x):
+        sub_count = 0
+        if class_list[indx] == class_check:
+
+            for index, equal in zip(indx_list, equal_to):
+                if obs[index] == equal:
+                    sub_count += 1
+            if sub_count == len(indx_list):
+                count += 1
+    return count / len([j for j in class_list if j == class_check])
+
+
+
+
+
+
 # ada boost algorithm assuming equal probability of initial weights
 # error_lists: list of lists of booleans, one list for each round of ada boost.
 # each list contains elements that are True is they were misclassfied, and
