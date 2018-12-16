@@ -10,16 +10,19 @@ TN = 3
 # split into K-datasplits where in each split 1/K is hold
 # out for testing and (K-1)/K is used for training.
 
+# for decision tree boundries
 # p infinity norm = square
 # p 2 norm = circle
 # p 1 norm = diamond
 
-# K1 * (K2 *  L + 1)(edited)
+# how many models are trained in two-layer cross validation?
+# K1 * (K2 *  L + 1)
 # K1 = outer cv
 # 2 = inner cv
 # L = antal parametre, man tester
 
 
+# only works with 2 classes, same with f11
 # computes f00
 def f00(a, b):
     count = 0
@@ -118,6 +121,31 @@ def support(x, indx_list):
         if inner_count == len(indx_list):
             count += 1
     return round(count / len(x), 3)
+
+
+# amount of variance explained for a single PCA component
+# input: a list containing the diagonal of the S matrix
+def pca_var(s_diag):
+    output_list = []
+    for var_test in s_diag:
+        top = var_test ** 2
+        sum = 0
+        for var_denom in s_diag:
+            sum += var_denom ** 2
+        output_list.append(round(top / sum, 3))
+    return output_list
+
+
+# total variance explained by PCA1, PCA1 + PCA2, ..., PCA1 + ..., PCAN
+# input: a list containing the diagonal of the S matrix
+def pca_var_combined(s_diag):
+    var_ex_list = pca_var(s_diag)
+    sum = 0
+    output_list = []
+    for var_ex in var_ex_list:
+        sum += var_ex
+        output_list.append(sum)
+    return output_list
 
 
 # calculates support for each item set included in indx_list
@@ -244,9 +272,10 @@ def prob_given_class(x, class_list, class_check, indx_check, equal):
 
 # x: observation list. class_list:
 # class of x[i] = class_list[i].
-# naive bayes i p(y = c | x1, ..., xn)
+# naive bayes: p(y = c | x1, ..., xn)
 # class_check: c
 # indx_list: the indexes of x1 ... xn
+# equal_to: what each index in indx_list should be equal to.
 def naive_bayes(x, class_list, class_check, indx_list, equal_to, C):
     top = 1
     for indx, equal in zip(indx_list, equal_to):
@@ -289,7 +318,6 @@ def ada_boost(error_lists):
                 top_alpha = alpha
             top_w = w * math.exp(top_alpha)
             bot_w_sum = 0
-            print(top_w)
 
             for w, error in zip(w_list, error_list):
                 top_alpha = -alpha
@@ -324,7 +352,7 @@ def k_means_1d_no_init(cluster_list):
 
 
 # use this if you are given a set of initial centroids
-def k_means_1d_init(obs_list, init_list, k):
+def k_means_1d_init(obs_list, init_list):
     mean_list = []
     # init mean list with intial centroids
     for init in init_list:
@@ -334,7 +362,7 @@ def k_means_1d_init(obs_list, init_list, k):
     while (cond):
         old_mean_list = mean_list
         centroid_list = []
-        for i in range(0, k):
+        for i in range(0, len(init_list)):
             centroid_list.append([])
         # assign each point to each nearest cluster
         for obs in obs_list:
